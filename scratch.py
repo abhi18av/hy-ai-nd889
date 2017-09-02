@@ -1,1 +1,3 @@
-import this
+import sys
+
+sys.copyright
