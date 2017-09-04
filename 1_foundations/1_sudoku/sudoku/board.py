@@ -2,8 +2,6 @@
 # Author: github.com/madhavajay
 """nd889 AIND Project 1 - Sudoku"""
 
-from typing import List, Dict, Set
-
 # type alias for the board state
 BoardState = Dict[str, str]
 
@@ -21,39 +19,39 @@ class Board():
     _cols = '123456789'
     _col_squares = ['123', '456', '789']
 
-    def __init__(self, diagonal_mode: bool=False) -> None:
+    def __init__(self, diagonal_mode):
         self._diagonal_mode = diagonal_mode
         self._peers = None  # type: Dict[str, Set[str]]
         self._all_units = None  # type: List[Unit]
         self._units = None  # type: Dict[str, List[Unit]]
 
     @staticmethod
-    def cross(x_axis: str, y_axis: str) -> List[str]:
+    def cross(x_axis, y_axis):
         """Zip characters from two strings into a list of 2 character keys"""
         return [x_val + y_val for x_val in x_axis for y_val in y_axis]
 
     @staticmethod
-    def boxes() -> List[str]:
+    def boxes():
         """Generate all possible box location keys on the board"""
         return Board.cross(Board._rows, Board._cols)
 
     @staticmethod
-    def num_boxes() -> int:
+    def num_boxes():
         """Return the number of boxes in the board"""
         return len(Board._rows) * len(Board._cols)
 
     @staticmethod
-    def _row_units() -> List[Unit]:
+    def _row_units():
         """Generate all row units for the board"""
         return [Board.cross(r, Board._cols) for r in Board._rows]
 
     @staticmethod
-    def _column_units() -> List[Unit]:
+    def _column_units():
         """Generate all column units for the board"""
         return [Board.cross(Board._rows, c) for c in Board._cols]
 
     @staticmethod
-    def _diagonal_units() -> List[Unit]:
+    def _diagonal_units():
         """Generate both diagonal units for the board"""
         unit_1 = [Board._rows[int(vl) - 1] + vl for vl in Board._values]
         unit_2 = [Board._rows[::-1][int(vl) - 1] + vl for vl in Board._values]
@@ -61,26 +59,24 @@ class Board():
         return [unit_1, unit_2]
 
     @staticmethod
-    def _square_units() -> List[Unit]:
+    def _square_units():
         """Generate all quadrant units for the board"""
         return [Board.cross(rs, cs)
-                for rs in Board._row_squares
-                for cs in Board._col_squares]
+                for rs in Board._row_squares for cs in Board._col_squares]
 
-    def all_units(self) -> List[Unit]:
+    def all_units(self):
         """
         Combine all units together into an list of units, supports additional
         diagonal units if self._diagonal_mode is True
         """
         if self._all_units is None:
-            self._all_units = (Board._row_units() +
-                               Board._column_units() +
+            self._all_units = (Board._row_units() + Board._column_units() +
                                Board._square_units())
             if self._diagonal_mode:
                 self._all_units = self._all_units + Board._diagonal_units()
         return self._all_units
 
-    def generate_units(self) -> Dict[str, List[Unit]]:
+    def generate_units(self):
         """Generate all units once and cache them"""
         boxes = Board.boxes()
 
@@ -88,33 +84,33 @@ class Board():
         all_u = self.all_units()
 
         # re-arrange to dictionary of boxes and array of their units
-        units = dict(
-            (box, [unit for unit in all_u if box in unit]) for box in boxes)
+        units = dict((box, [unit for unit in all_u if box in unit])
+                     for box in boxes)
         return units
 
-    def units(self, box: str) -> List[Unit]:
+    def units(self, box):
         """Fetch units and generate if they don't exist yet"""
         if self._units is None:
             self._units = self.generate_units()
         return self._units[box]
 
-    def generate_peers(self) -> Dict[str, Set[str]]:
+    def generate_peers(self):
         """Generate all peers for every possible box key"""
         boxes = Board.boxes()
 
-        peers = dict(
-            (bx, set(sum(self.units(bx), [])) - set([bx])) for bx in boxes)
+        peers = dict((bx, set(sum(self.units(bx), [])) - set([bx]))
+                     for bx in boxes)
 
         return peers
 
-    def peers(self, box: str) -> Set[str]:
+    def peers(self, box):
         """Return peers for a given box key"""
         if self._peers is None:
             self._peers = self.generate_peers()
         return self._peers[box]
 
     @staticmethod
-    def grid_values(board_string: str) -> BoardState:
+    def grid_values(board_string):
         """Convert unsolved board string into a board state dictionary"""
         if len(board_string) != Board.num_boxes():
             raise ValueError('Board string length must be 81 characters')
@@ -128,7 +124,7 @@ class Board():
         return board_dict
 
     @staticmethod
-    def board_to_str(board_dict: BoardState) -> str:
+    def board_to_str(board_dict):
         """
         Convert a board dictionary into a comma separated string of values
         in order of the original boxes array for easy comparison during tests
@@ -138,7 +134,7 @@ class Board():
             string += board_dict[key] + ','
         return string[:-1]
 
-    def eliminate(self, board_dict: BoardState) -> BoardState:
+    def eliminate(self, board_dict):
         """Apply the eliminate strategy on the supplied board and return it"""
         solved_values = [box for box in board_dict.keys()
                          if len(board_dict[box]) == 1]
@@ -148,7 +144,7 @@ class Board():
                 board_dict[peer] = board_dict[peer].replace(digit, '')
         return board_dict
 
-    def only_choice(self, board_dict: BoardState) -> BoardState:
+    def only_choice(self, board_dict):
         """Apply only choice strategy on the supplied board and return it"""
         all_units = self.all_units()
         for unit in all_units:
@@ -160,19 +156,19 @@ class Board():
         return board_dict
 
     @staticmethod
-    def num_solved_boxes(board_dict: BoardState) -> int:
+    def num_solved_boxes(board_dict):
         """Calculate number of solved boxes on the board"""
         return len([box for box in board_dict.keys()
                     if len(board_dict[box]) == 1])
 
     @staticmethod
-    def sorted_box_possibilities(board_dict: BoardState) -> List[str]:
+    def sorted_box_possibilities(board_dict):
         """Return unsolved boxes ordered by lowest combinations first"""
         options = [box for box in board_dict.keys()
                    if len(board_dict[box]) > 1]
         return sorted(options, key=lambda box: len(board_dict[box]))
 
-    def reduce_puzzle(self, board_dict: BoardState) -> BoardState:
+    def reduce_puzzle(self, board_dict):
         """Recursively apply eliminate and only choice until no change"""
         stalled = False
         while not stalled:
@@ -196,7 +192,7 @@ class Board():
                 return None
         return board_dict
 
-    def validate(self, board_dict: BoardState) -> bool:
+    def validate(self, board_dict):
         """Check every unit on the board contains the set 1-9"""
         valid = True
         all_units = self.all_units()
@@ -209,7 +205,7 @@ class Board():
                 break
         return valid
 
-    def search(self, board_dict: BoardState) -> BoardState:
+    def search(self, board_dict):
         """
         Using depth-first search recursively reduce the board state
         until the first leaf is solved or there are no solutions
@@ -240,7 +236,7 @@ class Board():
 
         return None
 
-    def naked_twins(self, board_dict: BoardState) -> BoardState:
+    def naked_twins(self, board_dict):
         """
         Search for pairs of unsolved boxes with 2 matching values in each unit
         and remove both values from all other boxes in that unit
@@ -263,8 +259,7 @@ class Board():
 
         return board_dict
 
-    def naked_multi(self, board_dict: BoardState,
-                    size: int) -> BoardState:
+    def naked_multi(self, board_dict, size):
         """
         Search for groups of twins, triplets, quads in a more generalized way
         and remove values from all other boxes in that unit
@@ -289,8 +284,7 @@ class Board():
             # go through all units that potential leader is in
             for unit in self.units(leader_box):
                 subsets = []
-                for box in [box for box in unit
-                            if box != leader_box]:
+                for box in [box for box in unit if box != leader_box]:
                     subset = set(list(board_dict[box]))
                     if len(subset) > 1 and subset.issubset(options):
                         subsets.append(subset)
@@ -301,8 +295,7 @@ class Board():
         return board_dict
 
     @staticmethod
-    def _remove_values_in_boxes(board_dict: BoardState, values: Set[str],
-                                boxes: List[str]) -> BoardState:
+    def _remove_values_in_boxes(board_dict, values, boxes):
         for box in boxes:
             new_set = board_dict[box]
             if not set(list(new_set)).issubset(values):
@@ -314,13 +307,12 @@ class Board():
         return board_dict
 
     @staticmethod
-    def display(values: BoardState) -> None:
+    def display(values):
         """Print ascii board representation of board dictionary"""
         width = 1 + max(len(values[s]) for s in Board.boxes())
         line = '+'.join(['-' * (width * 3)] * 3)
         for row in Board._rows:
-            print(''.join(
-                values[row + col].center(width) +
-                ('|' if col in '36' else '') for col in Board._cols))
+            print(''.join(values[row + col].center(width) + (
+                '|' if col in '36' else '') for col in Board._cols))
             if row in 'CF':
                 print(line)
