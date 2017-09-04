@@ -1,3 +1,10 @@
+
+desc "Export the current conda environment into an environment.yml "
+
+conda env export > environment.yml
+
+
+=======
 require 'find'
    ALL_SOURCE_FILES = []
    Find.find('./src') do |path|
