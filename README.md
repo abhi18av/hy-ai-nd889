@@ -2,3 +2,5 @@
 
 TODO:
 - Install hy test framework
+- install bokeh
+- rakefile , convert py to hy

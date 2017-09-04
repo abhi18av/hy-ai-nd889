@@ -9,14 +9,14 @@ from sudoku.board import Board as SB
 from sudoku.board import BoardState
 
 
-def solve(board_string: str) -> BoardState:
+def solve(board_string):
     """Call search with diagonal_mode True in board.py"""
     sbrd = SB(diagonal_mode=True)
     board = sbrd.grid_values(board_string)
     return sbrd.search(board)
 
 
-def naked_twins(board_dict: BoardState) -> BoardState:
+def naked_twins(board_dict):
     """Call naked_twins in board.py"""
     sbrd = SB()
     return sbrd.naked_twins(board_dict)
