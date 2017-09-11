@@ -1,6 +1,5 @@
 # hy-ai-nd889
 
-<<<<<<< HEAD
 TODO:
 - Install hy test framework
 - install bokeh
@@ -8,4 +7,3 @@ TODO:
 =======
 
 - Install Hytest
->>>>>>> master
